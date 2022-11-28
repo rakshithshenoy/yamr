@@ -1,13 +1,40 @@
 services:
-  worker_node:
+  worker_node-1:
     build:
       context: worker_node
-      dockerfile: worker.Dockerfile
+      dockerfile: worker1.Dockerfile
     ports:
       - 5000
     volumes:
       - ./worker_node:/app
-      - data:/app/data
+      - ./worker_node/data1:/app/data1
+      - data1:/app/data1
+    networks:
+      - default
+  worker_node-2:
+    build:
+      context: worker_node
+      dockerfile: worker2.Dockerfile
+    ports:
+      - 5000
+    volumes:
+      - ./worker_node:/app
+      - ./worker_node/data2:/app/data2
+      - data2:/app/data2
+    networks:
+      - default
+  worker_node-3:
+    build:
+      context: worker_node
+      dockerfile: worker3.Dockerfile
+    ports:
+      - 5000
+    volumes:
+      - ./worker_node:/app
+      - ./worker_node/data3:/app/data3
+      - data3:/app/data3
+    networks:
+      - default
 
   master_node:
     build:
@@ -19,22 +46,36 @@ services:
       - ./master_node:/app
       - metadata:/app/metadata
 
-  client_node:
-    build:
-      context: client_node
-      dockerfile: client.Dockerfile
-    tty: true
-    stdin_open: true
-    ports:
-      - 3000:3000
-    volumes:
-      - ./client_node/src:/client/src
     depends_on:
-      - master_node
+      - worker_node-1
+      - worker_node-2
+      - worker_node-3
+    networks:
+      - default
+
+  # client_node:
+  #   build:
+  #     context: client_node
+  #     dockerfile: client.Dockerfile
+  #   tty: true
+  #   stdin_open: true
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - ./client_node/src:/client/src
+  #   depends_on:
+  #     - master_node
+  #     - worker_node-1
+  #     - worker_node-2
+  #     - worker_node-3
+  #   networks:
+  #     - default
 
 volumes:
   metadata:
-  data:
+  data1:
+  data2:
+  data3:
 
 networks:
   default:
