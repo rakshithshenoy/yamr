@@ -53,23 +53,23 @@ services:
     networks:
       - default
 
-  # client_node:
-  #   build:
-  #     context: client_node
-  #     dockerfile: client.Dockerfile
-  #   tty: true
-  #   stdin_open: true
-  #   ports:
-  #     - 3000:3000
-  #   volumes:
-  #     - ./client_node/src:/client/src
-  #   depends_on:
-  #     - master_node
-  #     - worker_node-1
-  #     - worker_node-2
-  #     - worker_node-3
-  #   networks:
-  #     - default
+  client_node:
+    build:
+      context: client_node
+      dockerfile: client.Dockerfile
+    tty: true
+    stdin_open: true
+    ports:
+      - 3000:3000
+    volumes:
+      - ./client_node/src:/client/src
+    depends_on:
+      - master_node
+      - worker_node-1
+      - worker_node-2
+      - worker_node-3
+    networks:
+      - default
 
 volumes:
   metadata:
