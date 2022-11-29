@@ -1,3 +1,4 @@
 master_node/node_modules
 client_node/node_modules
 worker_node/node_modules
+.DS_Store
