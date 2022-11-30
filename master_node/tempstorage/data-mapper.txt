@@ -1,0 +1,1 @@
+[{"key":"A","count":6},{"key":"B","count":4},{"key":"C","count":3},{"key":"D","count":3},{"key":"E","count":1},{"key":"H","count":2},{"key":"I","count":2},{"key":"K","count":4},{"key":"L","count":2},{"key":"N","count":1},{"key":"O","count":2},{"key":"R","count":3},{"key":"S","count":2},{"key":"T","count":1},{"key":"V","count":3},{"key":"Y","count":1},{"key":"Z","count":1}]
