@@ -11,6 +11,8 @@ module.exports = {
       darksky: "#86BBD8",
       queenblue: "#33658A",
       orangered: "#F26419",
+      background: "#264653",
+      webgreen: "#2A9D8F",
     },
     extend: {},
   },
