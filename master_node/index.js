@@ -2,10 +2,12 @@ const express = require("express");
 const app = express();
 const axios = require("axios");
 const FormData = require("form-data");
+const cors = require("cors");
 
 const fileUpload = require("express-fileupload");
 const fs = require("fs");
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(
@@ -16,6 +18,7 @@ app.use(
 
 app.post("/splitnormal", async (req, res) => {
   try {
+    console.log("in master node");
     if (!req.files) {
       res.send({
         status: false,
@@ -26,15 +29,17 @@ app.post("/splitnormal", async (req, res) => {
         fs.readFileSync(`./metadata/metadata.txt`, "utf-8")
       );
 
+      console.log("Read metadata");
+
       let uploadedFile = req.files.masterfile;
+
+      console.log("read file");
+      console.log("FILE NAME", uploadedFile.name);
 
       let flag = 0;
       if (metadata.length > 0) {
         metadata.map((el) => {
           if (el.name == uploadedFile.name) {
-            res
-              .status(400)
-              .json({ message: "A file with this name already exists" });
             flag = 1;
           }
         });
@@ -56,13 +61,14 @@ app.post("/splitnormal", async (req, res) => {
       const d = JSON.stringify(metadata);
 
       fs.writeFileSync("./metadata/metadata.txt", d);
-
+      console.log("meta data written");
       await uploadedFile.mv("./tempstorage/" + uploadedFile.name);
-
+      console.log("file put in temp storage");
       const contents = fs.readFileSync(
         `./tempstorage/${uploadedFile.name}`,
         "utf-8"
       );
+      console.log("read stuff from temp storage");
 
       const arr = contents.split(/\r?\n/);
 
@@ -71,23 +77,47 @@ app.post("/splitnormal", async (req, res) => {
       const arr2 = arr.slice(dkeys, 2 * dkeys);
       const arr3 = arr.slice(2 * dkeys);
 
-      axios.post("http://yet_another_map_reduce-worker_node-1-1:5000/data", {
-        arr: arr1,
-        name: uploadedFile.name,
-        num: 1,
-      });
-      axios.post("http://yet_another_map_reduce-worker_node-2-1:5000/data", {
-        arr: arr2,
-        name: uploadedFile.name,
-        num: 2,
-      });
-      axios.post("http://yet_another_map_reduce-worker_node-3-1:5000/data", {
-        arr: arr3,
-        name: uploadedFile.name,
-        num: 3,
-      });
-      res.status(200).json({ array: arr, arr1, arr2, arr3 });
+      console.log("sliced");
+
+      await axios.post(
+        "http://yet_another_map_reduce-worker_node-1-1:5000/data",
+        {
+          arr: arr1,
+          name: uploadedFile.name,
+          num: 1,
+        }
+      );
+      await axios.post(
+        "http://yet_another_map_reduce-worker_node-2-1:5000/data",
+        {
+          arr: arr2,
+          name: uploadedFile.name,
+          num: 2,
+        }
+      );
+      await axios.post(
+        "http://yet_another_map_reduce-worker_node-3-1:5000/data",
+        {
+          arr: arr3,
+          name: uploadedFile.name,
+          num: 3,
+        }
+      );
+      fs.unlinkSync(`./tempstorage/${uploadedFile.name}`);
+      return res.status(200).json({ array: arr, arr1, arr2, arr3 });
     }
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+app.get("/metadata", async (req, res) => {
+  try {
+    const metadata = JSON.parse(
+      fs.readFileSync(`./metadata/metadata.txt`, "utf-8")
+    );
+
+    res.status(200).json({ metadata });
   } catch (err) {
     res.status(500).send(err);
   }
@@ -169,6 +199,7 @@ app.post("/mapper/:name", async (req, res) => {
       });
     }
     if (flag) {
+      console.log("sending request to worker node");
       const response1 = await axios.post(
         "http://yet_another_map_reduce-worker_node-1-1:5000/mapper",
         {
@@ -176,6 +207,7 @@ app.post("/mapper/:name", async (req, res) => {
           num: 1,
         }
       );
+      console.log("sending request 2");
 
       const response2 = await axios.post(
         "http://yet_another_map_reduce-worker_node-2-1:5000/mapper",
@@ -197,16 +229,22 @@ app.post("/mapper/:name", async (req, res) => {
         ...response3.data.mappedArr,
       ];
       const mappedData = JSON.stringify(arr);
-      const f = fs.writeFileSync(
+      fs.writeFileSync(
         `./tempstorage/${name.slice(0, -4)}-mapper.txt`,
         mappedData
       );
 
-      res.status(200).json({ array: arr });
+      res.status(200).json({
+        array: arr,
+        arr1: response1.data.mappedArr,
+        arr2: response2.data.mappedArr,
+        arr3: response3.data.mappedArr,
+      });
     } else {
       res.status(501).send(err);
     }
   } catch (err) {
+    console.log("Inside master catch", err);
     res.status(500).send(err);
   }
 });
@@ -258,7 +296,7 @@ app.post("/uploadfiles/:name", async (req, res) => {
       form3.append("reducer", reducer.data, reducer.name);
       console.log(form1);
 
-      await axios.post(
+      const res1 = await axios.post(
         "http://yet_another_map_reduce-worker_node-1-1:5000/uploadfiles",
         form1,
         {
@@ -267,7 +305,7 @@ app.post("/uploadfiles/:name", async (req, res) => {
           },
         }
       );
-      await axios.post(
+      const res2 = await axios.post(
         "http://yet_another_map_reduce-worker_node-2-1:5000/uploadfiles",
         form2,
         {
@@ -276,7 +314,7 @@ app.post("/uploadfiles/:name", async (req, res) => {
           },
         }
       );
-      await axios.post(
+      const res3 = await axios.post(
         "http://yet_another_map_reduce-worker_node-3-1:5000/uploadfiles",
         form3,
         {
@@ -379,7 +417,14 @@ app.get("/shuffle/:name", (req, res) => {
       }
     );
 
-    res.status(200).json({ arr1: arr1, arr2: arr2, arr3: arr3 });
+    res
+      .status(200)
+      .json({
+        array: [...arr1, ...arr2, ...arr3],
+        arr1: arr1,
+        arr2: arr2,
+        arr3: arr3,
+      });
   } catch (err) {
     res.status(500).json({ message: "An error occurred" });
   }
