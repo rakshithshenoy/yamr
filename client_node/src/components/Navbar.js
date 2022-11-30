@@ -12,7 +12,7 @@ function Navbar() {
             navigate("/");
           }}
         >
-          Read/ write
+          Read/ Write
         </button>
         <a href="/" class="flex items-center">
           <img src={pic} class="h-24" alt="yamr Logo" />
@@ -25,7 +25,7 @@ function Navbar() {
             navigate("/mapreduce");
           }}
         >
-          Map-reduce
+          MapReduce
         </button>
       </div>
     </nav>

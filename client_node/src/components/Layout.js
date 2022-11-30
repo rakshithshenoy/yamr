@@ -8,14 +8,14 @@ function Layout(props) {
       <footer class="p-4 bg-background  shadow md:flex md:items-center md:justify-between md:p-6 dark:bg-gray-800">
         <span class="text-sm text-[#fff] sm:text-center dark:text-gray-400">
           © Big Data 2022{" "}
-          <a href="https://" class="hover:underline">
-            DivyaNoelRakshith™
+          <a href="/" class="hover:underline">
+            Divya | Noel | Rakshith
           </a>
-          . All Rights Reserved.
+            . All Rights Reserved.
         </span>
         <ul class="flex flex-wrap items-center mt-3 text-sm text-[#fff] dark:text-gray-400 sm:mt-0">
           <li>
-            <a href="#" class="mr-4 hover:underline md:mr-6 ">
+            <a href="/about" class="mr-4 hover:underline md:mr-6 ">
               About
             </a>
           </li>
@@ -31,7 +31,7 @@ function Layout(props) {
             </a>
           </li> */}
           <li>
-            <a href="https://github.com/Projects-EC-2022/BD2_429_446_447" class="hover:underline">
+            <a target="_blank" href="https://github.com/Projects-EC-2022/BD2_429_446_447" class="hover:underline">
               Github
             </a>
           </li>
