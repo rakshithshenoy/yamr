@@ -2,8 +2,10 @@ const express = require("express");
 const app = express();
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
+const cors = require("cors");
 
 // app.use(fileupload());
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(
@@ -58,7 +60,7 @@ app.post("/read", (req, res) => {
 });
 
 app.post("/uploadfiles", (req, res) => {
-  console.log("REQUEST", req.body);
+  // console.log("REQUEST", req.body);
   const { name, num } = req.body;
   const { mapper, reducer } = req.files;
 
@@ -72,15 +74,16 @@ app.post("/uploadfiles", (req, res) => {
 
 app.post("/mapper", (req, res) => {
   try {
+    console.log("INSIDE MAPPER2");
     const num = req.body.num;
     const name = req.body.name;
     const { mapper } = require(`./data${num}/mapper-${name}.js`);
 
-    console.log("INSIDE MAPPER2");
     const mappedArr = mapper(name, num);
 
-    res.status(200).json({ mappedArr });
+    return res.status(200).json({ mappedArr });
   } catch (err) {
+    console.log("Inside catch", err);
     res.status(500).json({ message: "An error occurred" });
   }
 });
@@ -103,7 +106,6 @@ app.post("/reducer", (req, res) => {
 app.listen(5000, () => {
   console.log(`Worker listening`);
 });
-
 
 // app.post("/mapper", (req, res) => {
 //   try {
@@ -129,8 +131,6 @@ app.listen(5000, () => {
 //     res.status(500).send(err);
 //   }
 // });
-
-
 
 // app.post("/reducer", (req, res) => {
 //   try {
@@ -176,5 +176,3 @@ app.listen(5000, () => {
 //     res.status(500).send(err);
 //   }
 // });
-
-
