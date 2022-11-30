@@ -1,0 +1,1 @@
+[{"key":"A","value":1},{"key":"A","value":1},{"key":"B","value":1},{"key":"C","value":1},{"key":"C","value":1}]
